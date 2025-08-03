@@ -29,16 +29,17 @@ X_numeric = pd.get_dummies(X, drop_first=True,dtype=int)
 print('After cleaning, shape:', X_numeric.shape)
 print('Sample columns:', list(X_numeric.columns)[:10])
 
-# select only the 'Hours_Studied' column
-X_simple = X_numeric[['Hours_Studied']]
+# select features
+features = ['Hours_Studied', 'Previous_Scores', 'Attendance', 'Sleep_Hours']
+X_multi = X_numeric[features]
 # 80% train, 20% test
-X_train, X_test, y_train, y_test = train_test_split(X_simple, y, test_size=0.2,random_state=1)
+X_train, X_test, y_train, y_test = train_test_split(X_multi, y, test_size=0.2,random_state=1)
 
 model = LinearRegression()
 model.fit(X_train, y_train)
 
 # Inspect the learned parameters
-print('Slope (coef):', model.coef_[0])
+print('Slope (coef):', dict(zip(features, model.coef_)))
 print('Intercept:', model.intercept_)
 
 # Make predictions and evaluate
@@ -50,9 +51,23 @@ print('Mean Absolute Error:', mae)
 print('R² score:', r2)
 
 # Visualize the results
-plt.scatter(X_test, y_test, label='Actual', alpha=0.6)
-plt.scatter(X_test, y_pred, label='Predicted', alpha=0.6)
-plt.xlabel('Hours_Studied')
-plt.ylabel('Exam_Score')
+# plot predicted first, in orange
+plt.scatter(y_test, y_pred,
+            alpha=0.6,
+            label='Predicted',
+            color='orange',
+            marker='o')
+
+# then plot actual, in blue with hollow face
+plt.scatter(y_test, y_test,
+            alpha=0.6,
+            label='Actual',
+            edgecolor='blue',
+            facecolor='none',
+            marker='o')
+plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], linestyle='--', linewidth=1)
+plt.xlabel('Actual Exam Score')
+plt.ylabel('Predicted Exam Score')
+plt.title('Predicted vs Actual')
 plt.legend()
 plt.show()
